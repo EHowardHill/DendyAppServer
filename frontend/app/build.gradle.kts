@@ -5,12 +5,12 @@ plugins {
 
 android {
     namespace = "com.dendy.market"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.dendy.market"
         minSdk = 24
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
@@ -50,4 +50,5 @@ dependencies {
     implementation(libs.coil)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.ktx)
+    implementation(libs.androidx.swiperefreshlayout)
 }

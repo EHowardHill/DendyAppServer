@@ -26,8 +26,17 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="v1.0"
+        android:text="Latest: v1.0"
         android:textColor="#666" />
+
+    <TextView
+        android:id="@+id/tvInstalledVersion"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="Installed: Checking..."
+        android:textColor="#666"
+        android:textStyle="italic" />
 
     <ProgressBar
         android:id="@+id/progressBar"

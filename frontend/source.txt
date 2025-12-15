@@ -1,3 +1,150 @@
+activity_details.xml: 
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:padding="32dp">
+
+    <ImageView
+        android:id="@+id/imgDetailIcon"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:src="@mipmap/ic_launcher" />
+
+    <TextView
+        android:id="@+id/tvDetailName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="App Name"
+        android:textSize="28sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/tvDetailVersion"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Latest: v1.0"
+        android:textColor="#666" />
+
+    <TextView
+        android:id="@+id/tvInstalledVersion"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="Installed: Checking..."
+        android:textColor="#666"
+        android:textStyle="italic" />
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:indeterminate="false"
+        android:max="100"
+        android:visibility="invisible" />
+
+    <TextView
+        android:id="@+id/tvStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="0%"
+        android:textSize="12sp"
+        android:visibility="invisible"/>
+
+    <Button
+        android:id="@+id/btnAction"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginTop="16dp"
+        android:text="Check Status" />
+
+</LinearLayout>
+
+activity_main.xml: 
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Magazine"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvTitle" />
+
+    <ProgressBar
+        android:id="@+id/mainProgressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/btnRefresh"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:src="@android:drawable/ic_popup_sync"
+        android:contentDescription="Refresh"
+        app:backgroundTint="#2196F3"
+        app:tint="#FFFFFF"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+
+item_app.xml: 
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="16dp">
+
+    <ImageView
+        android:id="@+id/imgIcon"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:src="@mipmap/ic_launcher" />
+
+    <TextView
+        android:id="@+id/tvAppName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="App Name"
+        android:textStyle="bold" />
+</LinearLayout>
+
+DetailsActivity.kt: 
 package com.dendy.market
 
 import android.annotation.SuppressLint
@@ -293,5 +440,167 @@ class DetailsActivity : AppCompatActivity() {
         } catch (e: PackageManager.NameNotFoundException) {
             "N/A"
         }
+    }
+}
+
+DownloadController.kt: 
+package com.dendy.market
+
+object DownloadController {
+    // Maps Package Name -> DownloadManager ID
+    private val activeDownloads = mutableMapOf<String, Long>()
+
+    fun isDownloading(packageName: String): Boolean {
+        return activeDownloads.containsKey(packageName)
+    }
+
+    fun getDownloadId(packageName: String): Long? {
+        return activeDownloads[packageName]
+    }
+
+    fun trackDownload(packageName: String, id: Long) {
+        activeDownloads[packageName] = id
+    }
+
+    fun clearDownload(packageName: String) {
+        activeDownloads.remove(packageName)
+    }
+}
+
+MainActivity.kt: 
+package com.dendy.market
+
+import android.content.Intent
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.ProgressBar
+import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import coil.load
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import kotlinx.coroutines.launch
+
+class MainActivity : AppCompatActivity() {
+
+    private lateinit var recycler: RecyclerView
+    private lateinit var progressBar: ProgressBar
+    private lateinit var btnRefresh: FloatingActionButton
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        recycler = findViewById(R.id.recyclerView)
+        progressBar = findViewById(R.id.mainProgressBar)
+        btnRefresh = findViewById(R.id.btnRefresh)
+
+        recycler.layoutManager = GridLayoutManager(this, 3)
+
+        // Initial Load
+        loadApps()
+
+        // Button Listener
+        btnRefresh.setOnClickListener {
+            loadApps()
+        }
+    }
+
+    private fun loadApps() {
+        // Show loading state
+        progressBar.visibility = View.VISIBLE
+        btnRefresh.isEnabled = false // Prevent spamming
+        recycler.alpha = 0.5f // Dim the list slightly while loading
+
+        lifecycleScope.launch {
+            try {
+                val apps = RetrofitClient.api.getApps()
+
+                // Update Adapter
+                recycler.adapter = AppsAdapter(apps) { app ->
+                    val intent = Intent(this@MainActivity, DetailsActivity::class.java)
+                    intent.putExtra("APP_DATA", app)
+                    startActivity(intent)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                Toast.makeText(this@MainActivity, "Failed to connect to store", Toast.LENGTH_SHORT).show()
+            } finally {
+                // Restore UI state
+                progressBar.visibility = View.GONE
+                btnRefresh.isEnabled = true
+                recycler.alpha = 1.0f
+            }
+        }
+    }
+
+    // (Adapter class remains unchanged from previous version)
+    class AppsAdapter(
+        private val apps: List<AppModel>,
+        private val onClick: (AppModel) -> Unit
+    ) : RecyclerView.Adapter<AppsAdapter.Holder>() {
+
+        class Holder(v: View) : RecyclerView.ViewHolder(v) {
+            val icon: ImageView = v.findViewById(R.id.imgIcon)
+            val name: TextView = v.findViewById(R.id.tvAppName)
+        }
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder {
+            val v = LayoutInflater.from(parent.context).inflate(R.layout.item_app, parent, false)
+            return Holder(v)
+        }
+
+        override fun onBindViewHolder(holder: Holder, position: Int) {
+            val app = apps[position]
+            holder.name.text = app.name
+            val fullIconUrl = BASE_URL + app.iconUrl
+            holder.icon.load(fullIconUrl)
+            holder.itemView.setOnClickListener { onClick(app) }
+        }
+
+        override fun getItemCount() = apps.size
+    }
+}
+
+Network.kt: 
+package com.dendy.market
+
+import com.google.gson.annotations.SerializedName
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.http.GET
+
+// --- CONFIGURATION ---
+const val BASE_URL = "https://cinemint.online/dendy/"
+
+// --- DATA MODELS ---
+data class AppModel(
+    val name: String,
+    @SerializedName("package_name") val packageName: String,
+    val version: String,
+    @SerializedName("version_code") val versionCode: Int,
+    @SerializedName("download_url") val downloadUrl: String,
+    @SerializedName("icon_url") val iconUrl: String
+) : java.io.Serializable
+
+// --- RETROFIT SERVICE ---
+interface ApiService {
+    @GET("api/list")
+    suspend fun getApps(): List<AppModel>
+}
+
+object RetrofitClient {
+    val api: ApiService by lazy {
+        Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(ApiService::class.java)
     }
 }
