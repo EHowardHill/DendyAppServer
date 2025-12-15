@@ -2,3 +2,4 @@ venv/
 app_store/apps/*
 app_store/icons/*
 app_store/instance/*
+tmp/
