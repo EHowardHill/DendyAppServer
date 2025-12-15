@@ -6,7 +6,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 
 // --- CONFIGURATION ---
-const val BASE_URL = "http://192.168.1.100:5000" // CHANGE THIS TO YOUR SERVER IP
+const val BASE_URL = "https://cinemint.online/dendy/"
 
 // --- DATA MODELS ---
 data class AppModel(
@@ -20,7 +20,7 @@ data class AppModel(
 
 // --- RETROFIT SERVICE ---
 interface ApiService {
-    @GET("/api/list")
+    @GET("api/list")
     suspend fun getApps(): List<AppModel>
 }
 
