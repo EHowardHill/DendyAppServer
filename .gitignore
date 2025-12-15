@@ -1,7 +1,7 @@
 venv/
-app_store/apps/*
-app_store/icons/*
-app_store/instance/*
+server/app_store/apps/*
+server/app_store/icons/*
+server/app_store/instance/*
+server/source.txt
 tmp/
 frontend/source.txt
-server/source.txt
